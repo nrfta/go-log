@@ -1,9 +1,9 @@
 module github.com/nrfta/go-log
 
-go 1.12
+go 1.13
 
 require (
-	github.com/go-chi/chi v4.0.3+incompatible
-	github.com/sirupsen/logrus v1.4.2
-	golang.org/x/net v0.0.0-20191209160850-c0dbc17a3553 // indirect
+	github.com/go-chi/chi v4.1.2+incompatible
+	github.com/sirupsen/logrus v1.6.0
+	golang.org/x/net v0.0.0-20200707034311-ab3426394381 // indirect
 )
