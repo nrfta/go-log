@@ -95,7 +95,7 @@ func InfoWithFields(fields Fields, args ...interface{}) {
 	logger.WithFields(logrus.Fields(fields)).Info(args)
 }
 
-func InfoWithFieldsF(fields Fields, message string, args ...interface{}) {
+func InfoWithFieldsf(fields Fields, message string, args ...interface{}) {
 	logger.WithFields(logrus.Fields(fields)).Infof(message, args)
 }
 
@@ -111,7 +111,7 @@ func DebugWithFields(fields Fields, args ...interface{}) {
 	logger.WithFields(logrus.Fields(fields)).Debug(args)
 }
 
-func DebugWithFieldsF(fields Fields, message string, args ...interface{}) {
+func DebugWithFieldsf(fields Fields, message string, args ...interface{}) {
 	logger.WithFields(logrus.Fields(fields)).Debugf(message, args)
 }
 
@@ -127,7 +127,7 @@ func ErrorWithFields(fields Fields, args ...interface{}) {
 	logger.WithFields(logrus.Fields(fields)).Error(args)
 }
 
-func ErrorWithFieldsF(fields Fields, message string, args ...interface{}) {
+func ErrorWithFieldsf(fields Fields, message string, args ...interface{}) {
 	logger.WithFields(logrus.Fields(fields)).Errorf(message, args)
 }
 
@@ -143,7 +143,7 @@ func WarnWithFields(fields Fields, args ...interface{}) {
 	logger.WithFields(logrus.Fields(fields)).Warn(args)
 }
 
-func WarnWithFieldsF(fields Fields, message string, args ...interface{}) {
+func WarnWithFieldsf(fields Fields, message string, args ...interface{}) {
 	logger.WithFields(logrus.Fields(fields)).Warnf(message, args)
 }
 
@@ -159,7 +159,7 @@ func FatalWithFields(fields Fields, args ...interface{}) {
 	logger.WithFields(logrus.Fields(fields)).Fatal(args)
 }
 
-func FatalWithFieldsF(fields Fields, message string, args ...interface{}) {
+func FatalWithFieldsf(fields Fields, message string, args ...interface{}) {
 	logger.WithFields(logrus.Fields(fields)).Fatalf(message, args)
 }
 
@@ -175,7 +175,7 @@ func PanicWithFields(fields Fields, args ...interface{}) {
 	logger.WithFields(logrus.Fields(fields)).Panic(args)
 }
 
-func PanicWithFieldsF(fields Fields, message string, args ...interface{}) {
+func PanicWithFieldsf(fields Fields, message string, args ...interface{}) {
 	logger.WithFields(logrus.Fields(fields)).Panicf(message, args)
 }
 
