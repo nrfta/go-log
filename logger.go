@@ -92,11 +92,11 @@ func Infof(message string, args ...interface{}) {
 }
 
 func InfoWithFields(fields Fields, args ...interface{}) {
-	logger.WithFields(logrus.Fields(fields)).Info(args)
+	logger.WithFields(logrus.Fields(fields)).Info(args...)
 }
 
 func InfoWithFieldsf(fields Fields, message string, args ...interface{}) {
-	logger.WithFields(logrus.Fields(fields)).Infof(message, args)
+	logger.WithFields(logrus.Fields(fields)).Infof(message, args...)
 }
 
 func Debug(args ...interface{}) {
@@ -108,11 +108,11 @@ func Debugf(message string, args ...interface{}) {
 }
 
 func DebugWithFields(fields Fields, args ...interface{}) {
-	logger.WithFields(logrus.Fields(fields)).Debug(args)
+	logger.WithFields(logrus.Fields(fields)).Debug(args...)
 }
 
 func DebugWithFieldsf(fields Fields, message string, args ...interface{}) {
-	logger.WithFields(logrus.Fields(fields)).Debugf(message, args)
+	logger.WithFields(logrus.Fields(fields)).Debugf(message, args...)
 }
 
 func Error(args ...interface{}) {
@@ -124,11 +124,11 @@ func Errorf(message string, args ...interface{}) {
 }
 
 func ErrorWithFields(fields Fields, args ...interface{}) {
-	logger.WithFields(logrus.Fields(fields)).Error(args)
+	logger.WithFields(logrus.Fields(fields)).Error(args...)
 }
 
 func ErrorWithFieldsf(fields Fields, message string, args ...interface{}) {
-	logger.WithFields(logrus.Fields(fields)).Errorf(message, args)
+	logger.WithFields(logrus.Fields(fields)).Errorf(message, args...)
 }
 
 func Warn(args ...interface{}) {
@@ -140,11 +140,11 @@ func Warnf(message string, args ...interface{}) {
 }
 
 func WarnWithFields(fields Fields, args ...interface{}) {
-	logger.WithFields(logrus.Fields(fields)).Warn(args)
+	logger.WithFields(logrus.Fields(fields)).Warn(args...)
 }
 
 func WarnWithFieldsf(fields Fields, message string, args ...interface{}) {
-	logger.WithFields(logrus.Fields(fields)).Warnf(message, args)
+	logger.WithFields(logrus.Fields(fields)).Warnf(message, args...)
 }
 
 func Fatal(args ...interface{}) {
@@ -156,11 +156,11 @@ func Fatalf(message string, args ...interface{}) {
 }
 
 func FatalWithFields(fields Fields, args ...interface{}) {
-	logger.WithFields(logrus.Fields(fields)).Fatal(args)
+	logger.WithFields(logrus.Fields(fields)).Fatal(args...)
 }
 
 func FatalWithFieldsf(fields Fields, message string, args ...interface{}) {
-	logger.WithFields(logrus.Fields(fields)).Fatalf(message, args)
+	logger.WithFields(logrus.Fields(fields)).Fatalf(message, args...)
 }
 
 func Panic(args ...interface{}) {
@@ -172,11 +172,11 @@ func Panicf(message string, args ...interface{}) {
 }
 
 func PanicWithFields(fields Fields, args ...interface{}) {
-	logger.WithFields(logrus.Fields(fields)).Panic(args)
+	logger.WithFields(logrus.Fields(fields)).Panic(args...)
 }
 
 func PanicWithFieldsf(fields Fields, message string, args ...interface{}) {
-	logger.WithFields(logrus.Fields(fields)).Panicf(message, args)
+	logger.WithFields(logrus.Fields(fields)).Panicf(message, args...)
 }
 
 // ServerLogger is a middleware that logs the start and end of each request, along
