@@ -91,12 +91,28 @@ func Infof(message string, args ...interface{}) {
 	logger.Infof(message, args...)
 }
 
+func InfoWithFields(fields Fields, args ...interface{}) {
+	logger.WithFields(logrus.Fields(fields)).Info(args)
+}
+
+func InfoWithFieldsF(fields Fields, message string, args ...interface{}) {
+	logger.WithFields(logrus.Fields(fields)).Infof(message, args)
+}
+
 func Debug(args ...interface{}) {
 	logger.Debug(args...)
 }
 
 func Debugf(message string, args ...interface{}) {
 	logger.Debugf(message, args...)
+}
+
+func DebugWithFields(fields Fields, args ...interface{}) {
+	logger.WithFields(logrus.Fields(fields)).Debug(args)
+}
+
+func DebugWithFieldsF(fields Fields, message string, args ...interface{}) {
+	logger.WithFields(logrus.Fields(fields)).Debugf(message, args)
 }
 
 func Error(args ...interface{}) {
@@ -107,12 +123,28 @@ func Errorf(message string, args ...interface{}) {
 	logger.Errorf(message, args...)
 }
 
+func ErrorWithFields(fields Fields, args ...interface{}) {
+	logger.WithFields(logrus.Fields(fields)).Error(args)
+}
+
+func ErrorWithFieldsF(fields Fields, message string, args ...interface{}) {
+	logger.WithFields(logrus.Fields(fields)).Errorf(message, args)
+}
+
 func Warn(args ...interface{}) {
 	logger.Warn(args...)
 }
 
 func Warnf(message string, args ...interface{}) {
 	logger.Warnf(message, args...)
+}
+
+func WarnWithFields(fields Fields, args ...interface{}) {
+	logger.WithFields(logrus.Fields(fields)).Warn(args)
+}
+
+func WarnWithFieldsF(fields Fields, message string, args ...interface{}) {
+	logger.WithFields(logrus.Fields(fields)).Warnf(message, args)
 }
 
 func Fatal(args ...interface{}) {
@@ -123,12 +155,28 @@ func Fatalf(message string, args ...interface{}) {
 	logger.Fatalf(message, args...)
 }
 
+func FatalWithFields(fields Fields, args ...interface{}) {
+	logger.WithFields(logrus.Fields(fields)).Fatal(args)
+}
+
+func FatalWithFieldsF(fields Fields, message string, args ...interface{}) {
+	logger.WithFields(logrus.Fields(fields)).Fatalf(message, args)
+}
+
 func Panic(args ...interface{}) {
 	logger.Panic(args...)
 }
 
 func Panicf(message string, args ...interface{}) {
 	logger.Panicf(message, args...)
+}
+
+func PanicWithFields(fields Fields, args ...interface{}) {
+	logger.WithFields(logrus.Fields(fields)).Panic(args)
+}
+
+func PanicWithFieldsF(fields Fields, message string, args ...interface{}) {
+	logger.WithFields(logrus.Fields(fields)).Panicf(message, args)
 }
 
 // ServerLogger is a middleware that logs the start and end of each request, along
