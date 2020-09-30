@@ -52,21 +52,7 @@ func New(isProduction bool, logLevel string) *logrus.Logger {
 	}
 	log := logrus.New()
 	log.SetFormatter(formatter)
-
-	switch logLevel {
-	case "panic":
-		log.SetLevel(logrus.PanicLevel)
-	case "fatal":
-		log.SetLevel(logrus.FatalLevel)
-	case "error":
-		log.SetLevel(logrus.ErrorLevel)
-	case "warn":
-		log.SetLevel(logrus.WarnLevel)
-	case "info":
-		log.SetLevel(logrus.InfoLevel)
-	case "debug":
-		log.SetLevel(logrus.DebugLevel)
-	}
+	log.SetLevel(getLevel(logLevel))
 
 	logger = log
 	return log
@@ -81,6 +67,30 @@ func RequestLogger(ctx context.Context) Logger {
 
 func Writer() *io.PipeWriter {
 	return logger.Writer()
+}
+
+func WriterLevel(logLevel string) *io.PipeWriter {
+	return logger.WriterLevel(getLevel(logLevel))
+}
+
+func getLevel(logLevel string) logrus.Level {
+	level := logrus.InfoLevel
+	switch logLevel {
+	case "panic":
+		level = logrus.PanicLevel
+	case "fatal":
+		level = logrus.FatalLevel
+	case "error":
+		level = logrus.ErrorLevel
+	case "warn":
+		level = logrus.WarnLevel
+	case "info":
+		level = logrus.InfoLevel
+	case "debug":
+		level = logrus.DebugLevel
+	}
+
+	return level
 }
 
 func Info(args ...interface{}) {
