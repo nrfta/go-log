@@ -58,6 +58,10 @@ func New(isProduction bool, logLevel string) *logrus.Logger {
 	return log
 }
 
+func GetLogger() Logger {
+	return logger
+}
+
 // RequestLogger creates a logger with the request ID on it
 func RequestLogger(ctx context.Context) Logger {
 	return logger.WithFields(logrus.Fields{
