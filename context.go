@@ -2,6 +2,7 @@ package log
 
 import "context"
 
+// ContextKeyLogFields is the key for the logging fields context value.
 const ContextKeyLogFields = "nrfta/go-log/Fields"
 
 // WithContext adds logging `Fields` as a context value to the parent context and returns the new context.
@@ -9,7 +10,8 @@ func WithContext(parent context.Context) context.Context {
 	return context.WithValue(parent, ContextKeyLogFields, make(Fields))
 }
 
-// AddContextField adds a new field to the `Fields` held in the logging fields context value.
+// AddContextField adds a new field to the `Fields` held in the logging fields context value. AddContextField panics if
+// the logging fields could not be found in context or if the value cannot be cast to `Fields`.
 func AddContextField(ctx context.Context, name string, value interface{}) {
 	fields := GetContextFields(ctx)
 	fields[name] = value
