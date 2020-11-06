@@ -7,6 +7,9 @@ const ContextKeyLogFields = "nrfta/go-log/Fields"
 
 // WithContext adds logging `Fields` as a context value to the parent context and returns the new context.
 func WithContext(parent context.Context) context.Context {
+	if parent.Value(ContextKeyLogFields) != nil {
+		return parent
+	}
 	return context.WithValue(parent, ContextKeyLogFields, make(Fields))
 }
 
