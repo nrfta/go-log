@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - '**'
+  release:
+    types: [published]
+
+jobs:
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Go
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.14.x
+
+      - name: Set GOPATH
+        # temporary fix
+        # see https://github.com/actions/setup-go/issues/14
+        run: |
+          echo "##[set-env name=GOPATH;]$(dirname $GITHUB_WORKSPACE)"
+          echo "##[add-path]$(dirname $GITHUB_WORKSPACE)/bin"
+        shell: bash
+
+      - name: Install Dependencies
+        run: go mod download
+
+      - name: Tests
+        run: go test -v ./...
