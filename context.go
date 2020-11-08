@@ -6,11 +6,12 @@ import "context"
 const ContextKeyLogFields = "nrfta/go-log/Fields"
 
 // WithContext adds logging `Fields` as a context value to the parent context and returns the new context.
-func WithContext(parent context.Context) context.Context {
+func WithContext(parent context.Context, fields ...Field) context.Context {
 	if parent.Value(ContextKeyLogFields) != nil {
+		PushContextFields(parent, fields...)
 		return parent
 	}
-	return context.WithValue(parent, ContextKeyLogFields, makeFieldStack())
+	return context.WithValue(parent, ContextKeyLogFields, makeFieldStack().push(fields))
 }
 
 func PushContextFields(ctx context.Context, fields ...Field) {

@@ -14,16 +14,14 @@ var _ = Describe("Context", func() {
 		})
 
 		It("should save field value in context", func() {
-			ctx := WithContext(context.Background())
-			PushContextFields(ctx, MakeField("foo", 5))
+			ctx := WithContext(context.Background(), MakeField("foo", 5))
 			fields := GetContextFields(ctx)
 			g.Expect(len(fields)).To(g.Equal(1))
 			g.Expect(fields["foo"]).To(g.Equal(5))
 		})
 
 		It("should push and pop fields", func() {
-			ctx := WithContext(context.Background())
-			PushContextFields(ctx, MakeField("foo", 5))
+			ctx := WithContext(context.Background(), MakeField("foo", 5))
 			fields := GetContextFields(ctx)
 			g.Expect(len(fields)).To(g.Equal(1))
 			g.Expect(fields["foo"]).To(g.Equal(5))
@@ -55,7 +53,7 @@ func func1(ctx context.Context) {
 }
 
 func func2(ctx context.Context) {
-	PushContextFields(ctx, MakeField("taz", 7))
+	WithContext(ctx, MakeField("taz", 7))
 	defer PopContextFields(ctx)
 
 	fields := GetContextFields(ctx)

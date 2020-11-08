@@ -24,15 +24,17 @@ func makeFieldStack() *fieldStack {
 	return &fieldStack{}
 }
 
-func (s *fieldStack) push(fields []Field) {
+func (s *fieldStack) push(fields []Field) *fieldStack {
 	item := makeFieldStackItem(fields)
 	s.items = append(s.items, item)
+	return s
 }
 
-func (s *fieldStack) pop() {
+func (s *fieldStack) pop() *fieldStack {
 	if len(s.items) > 0 {
 		s.items = s.items[:len(s.items)-1]
 	}
+	return s
 }
 
 func (s *fieldStack) allFields() Fields {
