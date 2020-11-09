@@ -1,5 +1,6 @@
 package log
 
+// Field represents a logging field.
 type Field struct {
 	Name string
 	Value interface{}
@@ -12,6 +13,7 @@ type fieldStack struct {
 	items []*fieldStackItem
 }
 
+// MakeField creates a new logging field.
 func MakeField(name string, value interface{}) Field {
 	return Field{name, value}
 }
@@ -30,11 +32,10 @@ func (s *fieldStack) push(fields []Field) *fieldStack {
 	return s
 }
 
-func (s *fieldStack) pop() *fieldStack {
+func (s *fieldStack) pop() {
 	if len(s.items) > 0 {
 		s.items = s.items[:len(s.items)-1]
 	}
-	return s
 }
 
 func (s *fieldStack) allFields() Fields {
