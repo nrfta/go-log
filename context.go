@@ -15,24 +15,31 @@ func WithContext(parent context.Context, fields ...Field) context.Context {
 	return context.WithValue(parent, ContextKeyLogFields, makeFieldStack().push(fields))
 }
 
-// PushContextFields pushes the given fields onto the logging fields stack. PushContextFields panics if the
-// context has not been initialized via WithContext.
+// PushContextFields pushes the given fields onto the logging fields stack.
 func PushContextFields(ctx context.Context, fields ...Field) {
 	stack := getStack(ctx)
+	if stack == nil {
+		return
+	}
 	stack.push(fields)
 }
 
-// PopContextFields pops the last entry off of the logging fields stack. PopContextFields panics if the
-// context has not been initialized via WithContext.
+// PopContextFields pops the last entry off of the logging fields stack.
 func PopContextFields(ctx context.Context) {
 	stack := getStack(ctx)
+	if stack == nil {
+		return
+	}
 	stack.pop()
 }
 
-// GetContextFields retrieves the logging `Fields` from context. GetContextFields panics if the
-// context has not been initialized via WithContext.
+// GetContextFields retrieves the logging `Fields` from context. GetContextFields returns an empty Fields map
+// if the context has not been initialized by calling WithContext.
 func GetContextFields(ctx context.Context, additionalFields ...Field) Fields {
 	stack := getStack(ctx)
+	if stack == nil {
+		return make(Fields)
+	}
 	fields := stack.allFields()
 	for _, f := range additionalFields {
 		fields[f.Name] = f.Value
@@ -43,11 +50,12 @@ func GetContextFields(ctx context.Context, additionalFields ...Field) Fields {
 func getStack(ctx context.Context) *fieldStack {
 	stackObj := ctx.Value(ContextKeyLogFields)
 	if stackObj == nil {
-		panic("logging fields have not been added to context yet; call WithContext")
+		Warn("context logging fields not initialized; call log.WithContext")
+		return nil
 	}
 	stack, ok := stackObj.(*fieldStack)
 	if !ok {
-		panic("logging fields are not of the correct type")
+		Warn("context logging fields has incorrect type")
 	}
 	return stack
 }

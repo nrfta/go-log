@@ -31,6 +31,25 @@ var _ = Describe("Context", func() {
 			fields = GetContextFields(ctx)
 			g.Expect(len(fields)).To(g.Equal(1))
 			g.Expect(fields["foo"]).To(g.Equal(5))
+
+			// pop should be safe to call even beyond actual stack height
+			PopContextFields(ctx)
+			PopContextFields(ctx)
+			PopContextFields(ctx)
+		})
+
+		It("should safely ignore when context is not initialized", func() {
+			ctx := context.Background()
+
+			fields := GetContextFields(ctx)
+			g.Expect(len(fields)).To(g.Equal(0))
+
+			PushContextFields(ctx, MakeField("foo", 0))
+			PopContextFields(ctx)
+
+			ctx = context.WithValue(ctx, ContextKeyLogFields, "wrong")
+			PopContextFields(ctx)
+			PopContextFields(ctx)
 		})
 	})
 })
