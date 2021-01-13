@@ -18,6 +18,13 @@ func MakeField(name string, value interface{}) Field {
 	return Field{name, value}
 }
 
+func FieldsToFieldsArray(fields Fields) (arr []Field) {
+	for name, value := range fields {
+		arr = append(arr, MakeField(name, value))
+	}
+	return
+}
+
 func makeFieldStackItem(fields []Field) *fieldStackItem {
 	return &fieldStackItem{fields}
 }

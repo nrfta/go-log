@@ -2,6 +2,8 @@ package log
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"time"
@@ -143,6 +145,26 @@ func ErrorWithFields(fields Fields, args ...interface{}) {
 
 func ErrorWithFieldsf(fields Fields, message string, args ...interface{}) {
 	logger.WithFields(logrus.Fields(fields)).Errorf(message, args...)
+}
+
+func NewError(args ...interface{}) error {
+	Error(args...)
+	return errors.New(fmt.Sprint(args...))
+}
+
+func NewErrorf(message string, args ...interface{}) error {
+	Errorf(message, args...)
+	return fmt.Errorf(message, args...)
+}
+
+func NewErrorWithFields(fields Fields, args ...interface{}) error {
+	ErrorWithFields(fields, args...)
+	return errors.New(fmt.Sprint(args...))
+}
+
+func NewErrorWithFieldsf(fields Fields, message string, args ...interface{}) error {
+	ErrorWithFieldsf(fields, message, args...)
+	return fmt.Errorf(message, args...)
 }
 
 func Warn(args ...interface{}) {
