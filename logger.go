@@ -41,7 +41,7 @@ func init() {
 }
 
 // New - Creates a new instance of logrus with customized configuration
-func New(isProduction bool, logLevel string) *logrus.Logger {
+func New(isJSONFormatted bool, logLevel string) *logrus.Logger {
 	var formatter logrus.Formatter
 
 	formatter = &logrus.TextFormatter{
@@ -49,7 +49,7 @@ func New(isProduction bool, logLevel string) *logrus.Logger {
 		DisableLevelTruncation: true,
 	}
 
-	if isProduction {
+	if isJSONFormatted {
 		formatter = &logrus.JSONFormatter{}
 	}
 	log := logrus.New()
