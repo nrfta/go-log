@@ -2,6 +2,7 @@ package log
 
 import (
 	"context"
+
 	. "github.com/onsi/ginkgo"
 	g "github.com/onsi/gomega" // gomega.Panic function collides with log.Panic
 )
