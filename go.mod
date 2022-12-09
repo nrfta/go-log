@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/go-chi/chi v4.1.2+incompatible
 	github.com/neighborly/go-errors v0.2.0
-	github.com/nrfta/go-asynq-helpers/v2 v2.0.3
+	github.com/nrfta/go-asynq-helpers/v2 v2.0.4
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.18.1
 	github.com/sirupsen/logrus v1.9.0
@@ -32,6 +32,3 @@ require (
 	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
-
-// TODO fix circular import
-replace github.com/nrfta/go-asynq-helpers/v2 => /Users/tesposito/Desktop/work/go-asynq-helpers
