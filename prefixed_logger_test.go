@@ -21,6 +21,7 @@ var _ = Describe("PrefixedLogger", func() {
 		pl2.Warnf("a warning %s", "log")
 		logger.Info("normal log")
 
+		//
 		logs := asyncTest.ParseLogs(buf)
 		g.Expect(len(logs)).To(g.Equal(3))
 		g.Expect(asyncTest.LogInLogs("msg", "Test: info log", logs)).To(g.BeTrue())
