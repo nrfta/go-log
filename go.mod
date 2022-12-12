@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/go-chi/chi v4.1.2+incompatible
 	github.com/neighborly/go-errors v0.2.0
-	github.com/nrfta/go-asynq-helpers/v2 v2.0.4
+	github.com/nrfta/go-asynq-helpers/v2 v2.0.5
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.18.1
 	github.com/sirupsen/logrus v1.9.0
