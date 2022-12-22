@@ -12,6 +12,8 @@ type ByteLogs struct {
 }
 
 func (b *ByteLogs) Parse(log *bytes.Buffer) {
+	// the buffer will contain the latest log since it is a pointer, but this function will need to be called
+	// to have the latest values in ParsedLogs for use with LogInLogs
 	if log != nil {
 		b.Log = log
 	}
@@ -44,7 +46,6 @@ func (b *ByteLogs) LogInLogs(key string, value interface{}) bool {
 }
 
 func (b *ByteLogs) CheckForLogEndMessage(customEnd ...string) bool {
-	// logs are parsed here for convenience of using logs in a gomege.Eventually block to catch new logs
 	haveStop := false
 	if len(customEnd) > 0 {
 		for _, msg := range customEnd {
