@@ -3,7 +3,6 @@ package log
 import (
 	"bytes"
 
-	asyncTest "github.com/nrfta/go-asynq-helpers/v2/pkg/tests"
 	. "github.com/onsi/ginkgo"
 	g "github.com/onsi/gomega"
 )
@@ -22,10 +21,21 @@ var _ = Describe("PrefixedLogger", func() {
 		logger.Info("normal log")
 
 		//
-		logs := asyncTest.ParseLogs(buf)
-		g.Expect(len(logs)).To(g.Equal(3))
-		g.Expect(asyncTest.LogInLogs("msg", "Test: info log", logs)).To(g.BeTrue())
-		g.Expect(asyncTest.LogInLogs("msg", "Foo: a warning log", logs)).To(g.BeTrue())
-		g.Expect(asyncTest.LogInLogs("msg", "normal log", logs)).To(g.BeTrue())
+		g.Expect(1).To(g.Equal(1))
+		b := ByteLogs{} // buffer can be passed in
+		b.Parse(&buf)   // or will be stored if passed to this function
+		g.Expect(len(b.Parsed)).To(g.Equal(3))
+		g.Expect(b.LogInLogs("msg", "Test: info log")).To(g.BeTrue())
+		g.Expect(b.LogInLogs("msg", "Foo: a warning log")).To(g.BeTrue())
+		g.Expect(b.LogInLogs("msg", "normal log")).To(g.BeTrue())
+
+		// log not yet in log
+		lateLog := "another log!"
+		g.Expect(b.LogInLogs("msg", lateLog)).To(g.BeFalse())
+		logger.Info(lateLog)
+		// log will be in buffer ref, but not parsed yet
+		g.Expect(b.LogInLogs("msg", lateLog)).To(g.BeFalse())
+		b.Parse(nil) // parse stored pointer to buffer
+		g.Expect(b.LogInLogs("msg", lateLog)).To(g.BeTrue())
 	})
 })
