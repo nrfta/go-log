@@ -13,15 +13,14 @@ var _ = Describe("PrefixedLogger", func() {
 		logger := New(true, "info")
 		logger.Out = &buf
 
-		pl := NewPrefixedLogger("Test")
-		pl2 := NewPrefixedLogger("Foo")
+		pl := NewPrefixedLogger("Test", logger)
+		pl2 := NewPrefixedLogger("Foo", logger)
 
 		pl.Info("info log")
 		pl2.Warnf("a warning %s", "log")
 		logger.Info("normal log")
 
 		//
-		g.Expect(1).To(g.Equal(1))
 		b := ByteLogs{} // buffer can be passed in
 		b.Parse(&buf)   // or will be stored if passed to this function
 		g.Expect(len(b.Parsed)).To(g.Equal(3))
@@ -37,5 +36,17 @@ var _ = Describe("PrefixedLogger", func() {
 		g.Expect(b.LogInLogs("msg", lateLog)).To(g.BeFalse())
 		b.Parse(nil) // parse stored pointer to buffer
 		g.Expect(b.LogInLogs("msg", lateLog)).To(g.BeTrue())
+	})
+
+	It("should create an info log by default if one is not given", func() {
+		buf := bytes.Buffer{}
+		pl := NewPrefixedLogger("test", nil)
+		pl.LoggerInstance.Out = &buf
+		pl.Info("goldfish")
+
+		b := ByteLogs{Log: &buf}
+		b.Parse(nil)
+		g.Expect(b.Parsed[0]["level"]).To(g.Equal("info"))
+		g.Expect(b.Parsed[0]["msg"]).To(g.Equal("test: goldfish"))
 	})
 })
