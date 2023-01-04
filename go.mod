@@ -6,7 +6,7 @@ require (
 	github.com/go-chi/chi v4.1.2+incompatible
 	github.com/neighborly/go-errors v0.2.0
 	github.com/onsi/ginkgo v1.14.2
-	github.com/onsi/gomega v1.11.0
+	github.com/onsi/gomega v1.10.1
 	github.com/sirupsen/logrus v1.6.0
 )
 
@@ -23,5 +23,6 @@ require (
 	golang.org/x/tools v0.0.0-20201224043029-2b0845dc783e // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
+	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )
