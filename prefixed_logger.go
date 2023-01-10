@@ -13,14 +13,17 @@ type PrefixedLogger struct {
 	LoggerInstance *logrus.Logger
 }
 
-func NewPrefixedLogger(prefix string, instance *logrus.Logger) PrefixedLogger {
+func NewPrefixedLogger(prefix string, instance Logger) PrefixedLogger {
+	var _logger *logrus.Logger
 	if instance == nil {
-		instance = New(true, "info")
+		_logger = New(true, "info")
+	} else if logrusLogger, ok := instance.(*logrus.Logger); ok {
+		_logger = logrusLogger
 	}
 
 	return PrefixedLogger{
 		Prefix:         prefix,
-		LoggerInstance: instance,
+		LoggerInstance: _logger,
 	}
 }
 
