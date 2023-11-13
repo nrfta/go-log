@@ -2,8 +2,10 @@ package log
 
 import "context"
 
+type logContextType string
+
 // ContextKeyLogFields is the key for the logging fields context value.
-const ContextKeyLogFields = "nrfta/go-log/Fields"
+const ContextKeyLogFields logContextType = "nrfta/go-log/Fields"
 
 // WithContext initializes context with a logging fields stack with the given fields. If the given
 // context has already bene initialized, then the fields are pushed onto the existing stack.
