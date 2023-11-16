@@ -1,6 +1,3 @@
-//go:build go1.21
-// +build go1.21
-
 package log
 
 import (
@@ -57,8 +54,8 @@ func (noopVariablesScrubber) Scrub(vars map[string]any) map[string]any {
 	return nil
 }
 
-// NewSlogGraphQLResponseMiddleware is used to log GraphQL requests and responses.
-func NewSlogGraphQLResponseMiddleware(l *slog.Logger, s VariablesScrubber) graphql.ResponseMiddleware {
+// NewSLogGraphQLResponseMiddleware is used to log GraphQL requests and responses.
+func NewSLogGraphQLResponseMiddleware(l *slog.Logger, s VariablesScrubber) graphql.ResponseMiddleware {
 	if l == nil {
 		l = slog.Default()
 	}

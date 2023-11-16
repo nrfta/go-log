@@ -1,6 +1,3 @@
-//go:build go1.21
-// +build go1.21
-
 package log
 
 import (
@@ -96,7 +93,7 @@ var _ = Describe("Logger", func() {
 						Errors: errors,
 					}
 				}
-				subject = NewSlogGraphQLResponseMiddleware(logger, nil)
+				subject = NewSLogGraphQLResponseMiddleware(logger, nil)
 			)
 
 			subject(graphql.WithOperationContext(context.Background(), oc), handler)
