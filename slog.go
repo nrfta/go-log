@@ -1,13 +1,13 @@
-//go:build go1.21
-// +build go1.21
-
 package log
 
 import (
+	"context"
 	"log/slog"
 	"net/http"
+	"strings"
 	"time"
 
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/go-chi/chi/middleware"
 )
 
@@ -39,5 +39,56 @@ func NewSLogChiMiddleware(l *slog.Logger) func(http.Handler) http.Handler {
 
 			next.ServeHTTP(ww, r)
 		})
+	}
+}
+
+type VariablesScrubber interface {
+	Scrub(map[string]any) map[string]any
+}
+
+type noopVariablesScrubber struct{}
+
+var _ VariablesScrubber = (*noopVariablesScrubber)(nil)
+
+func (noopVariablesScrubber) Scrub(vars map[string]any) map[string]any {
+	return nil
+}
+
+// NewSLogGraphQLResponseMiddleware is used to log GraphQL requests and responses.
+func NewSLogGraphQLResponseMiddleware(l *slog.Logger, s VariablesScrubber) graphql.ResponseMiddleware {
+	if l == nil {
+		l = slog.Default()
+	}
+
+	if s == nil {
+		s = noopVariablesScrubber{}
+	}
+
+	return func(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
+		var (
+			start = time.Now()
+			res   = next(ctx)
+			oc    = graphql.GetOperationContext(ctx)
+		)
+
+		if !strings.Contains(oc.RawQuery, "__ApolloGetServiceDefinition__") {
+			l.LogAttrs(
+				ctx,
+				slog.LevelInfo,
+				"GraphQL Request Served",
+				slog.Group(
+					"req",
+					slog.String("query", oc.RawQuery),
+					slog.Any("variables", s.Scrub(oc.Variables)),
+				),
+				slog.Group(
+					"res",
+					slog.String("errors", res.Errors.Error()),
+				),
+				slog.Duration("duration", time.Since(start)),
+			)
+		}
+
+		return res
 	}
 }
