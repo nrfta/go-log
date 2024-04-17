@@ -95,3 +95,15 @@ func NewSLogGraphQLResponseMiddleware(l *slog.Logger, s VariablesScrubber) graph
 		return res
 	}
 }
+
+func SLogReplaceAttr(_ []string, a slog.Attr) slog.Attr {
+	switch a.Value.Kind() {
+	case slog.KindAny:
+		switch v := a.Value.Any().(type) {
+		case error:
+			a.Value = slog.GroupValue(slog.String("message", v.Error()))
+		}
+	}
+
+	return a
+}

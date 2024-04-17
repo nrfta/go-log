@@ -123,4 +123,35 @@ var _ = Describe("Logger", func() {
 			g.Expect(lo.Graphql.Duration).To(g.BeNumerically(">", 0))
 		})
 	})
+
+	Describe("SLogReplaceAttr", func() {
+		It("should return a new slog.Attr with the error message", func() {
+			var (
+				buf    bytes.Buffer
+				logger = slog.New(
+					slog.NewJSONHandler(&buf, &slog.HandlerOptions{ReplaceAttr: SLogReplaceAttr}),
+				)
+				errMsg = "error"
+			)
+
+			logger.ErrorContext(
+				context.Background(),
+				"An error occurred",
+				slog.Any("error", errors.New(errMsg)),
+			)
+
+			var lo struct {
+				Msg   string `json:"msg"`
+				Error struct {
+					Message string `json:"message"`
+				} `json:"error"`
+			}
+
+			err := json.Unmarshal(buf.Bytes(), &lo)
+			g.Expect(err).To(g.Succeed())
+
+			g.Expect(lo.Msg).To(g.Equal("An error occurred"))
+			g.Expect(lo.Error.Message).To(g.Equal(errMsg))
+		})
+	})
 })
