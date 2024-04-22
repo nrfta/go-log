@@ -77,18 +77,33 @@ func NewSLogGraphQLResponseMiddleware(l *slog.Logger, s VariablesScrubber) graph
 				slog.LevelInfo,
 				"GraphQL Request Served",
 				slog.Group(
-					"req",
-					slog.String("query", oc.RawQuery),
-					slog.Any("variables", s.Scrub(oc.Variables)),
+					"graphql",
+					slog.Group(
+						"req",
+						slog.String("query", oc.RawQuery),
+						slog.Any("variables", s.Scrub(oc.Variables)),
+					),
+					slog.Group(
+						"res",
+						slog.String("errors", res.Errors.Error()),
+					),
+					slog.Duration("duration", time.Since(start)),
 				),
-				slog.Group(
-					"res",
-					slog.String("errors", res.Errors.Error()),
-				),
-				slog.Duration("duration", time.Since(start)),
 			)
 		}
 
 		return res
 	}
+}
+
+func SLogReplaceAttr(_ []string, a slog.Attr) slog.Attr {
+	switch a.Value.Kind() {
+	case slog.KindAny:
+		switch v := a.Value.Any().(type) {
+		case error:
+			a.Value = slog.GroupValue(slog.String("message", v.Error()))
+		}
+	}
+
+	return a
 }

@@ -99,15 +99,17 @@ var _ = Describe("Logger", func() {
 			subject(graphql.WithOperationContext(context.Background(), oc), handler)
 
 			type logOutput struct {
-				Msg string `json:"msg"`
-				Req struct {
-					Query     string         `json:"query"`
-					Variables map[string]any `json:"variables"`
-				} `json:"req"`
-				Res struct {
-					Errors string `json:"errors"`
-				} `json:"res"`
-				Duration int `json:"duration"`
+				Msg     string `json:"msg"`
+				Graphql struct {
+					Req struct {
+						Query     string         `json:"query"`
+						Variables map[string]any `json:"variables"`
+					} `json:"req"`
+					Res struct {
+						Errors string `json:"errors"`
+					} `json:"res"`
+					Duration int `json:"duration"`
+				} `json:"graphql"`
 			}
 
 			var lo logOutput
@@ -115,10 +117,41 @@ var _ = Describe("Logger", func() {
 			g.Expect(err).To(g.Succeed())
 
 			g.Expect(lo.Msg).To(g.Equal("GraphQL Request Served"))
-			g.Expect(lo.Req.Query).To(g.Equal(query))
-			g.Expect(lo.Req.Variables).To(g.BeNil())
-			g.Expect(lo.Res.Errors).To(g.Equal(fmt.Sprintf("input: %s\n", errMsg)))
-			g.Expect(lo.Duration).To(g.BeNumerically(">", 0))
+			g.Expect(lo.Graphql.Req.Query).To(g.Equal(query))
+			g.Expect(lo.Graphql.Req.Variables).To(g.BeNil())
+			g.Expect(lo.Graphql.Res.Errors).To(g.Equal(fmt.Sprintf("input: %s\n", errMsg)))
+			g.Expect(lo.Graphql.Duration).To(g.BeNumerically(">", 0))
+		})
+	})
+
+	Describe("SLogReplaceAttr", func() {
+		It("should return a new slog.Attr with the error message", func() {
+			var (
+				buf    bytes.Buffer
+				logger = slog.New(
+					slog.NewJSONHandler(&buf, &slog.HandlerOptions{ReplaceAttr: SLogReplaceAttr}),
+				)
+				errMsg = "error"
+			)
+
+			logger.ErrorContext(
+				context.Background(),
+				"An error occurred",
+				slog.Any("error", errors.New(errMsg)),
+			)
+
+			var lo struct {
+				Msg   string `json:"msg"`
+				Error struct {
+					Message string `json:"message"`
+				} `json:"error"`
+			}
+
+			err := json.Unmarshal(buf.Bytes(), &lo)
+			g.Expect(err).To(g.Succeed())
+
+			g.Expect(lo.Msg).To(g.Equal("An error occurred"))
+			g.Expect(lo.Error.Message).To(g.Equal(errMsg))
 		})
 	})
 })
