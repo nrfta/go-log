@@ -70,6 +70,17 @@ var _ = Describe("Logger", func() {
 		})
 	})
 
+	Describe("DevScrubber#Scrub", func() {
+		It("should return the same map", func() {
+			s := DevScrubber{}
+
+			in := map[string]any{"test": struct{ Data string }{Data: "data"}}
+			res := s.Scrub(in)
+
+			g.Expect(res).To(g.Equal(in))
+		})
+	})
+
 	Describe("NewGraphQLResponseMiddleware", func() {
 		It("should log GraphQL response and request info", func() {
 			var (
