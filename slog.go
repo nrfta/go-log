@@ -54,6 +54,16 @@ func (noopVariablesScrubber) Scrub(vars map[string]any) map[string]any {
 	return nil
 }
 
+var _ VariablesScrubber = (*DevScrubber)(nil)
+
+// DevScrubber is a VariablesScrubber that passes all var information from
+// GraphQL variables. It is intended for use in development environments.
+type DevScrubber struct{}
+
+func (DevScrubber) Scrub(vars map[string]any) map[string]any {
+	return vars
+}
+
 // NewSLogGraphQLResponseMiddleware is used to log GraphQL requests and responses.
 func NewSLogGraphQLResponseMiddleware(l *slog.Logger, s VariablesScrubber) graphql.ResponseMiddleware {
 	if l == nil {
