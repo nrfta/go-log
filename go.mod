@@ -9,7 +9,7 @@ require (
 	github.com/onsi/ginkgo v1.14.2
 	github.com/onsi/gomega v1.10.1
 	github.com/sirupsen/logrus v1.6.0
-	github.com/vektah/gqlparser/v2 v2.5.10
+	github.com/vektah/gqlparser/v2 v2.5.14
 )
 
 require (
