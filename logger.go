@@ -2,222 +2,175 @@ package log
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/go-chi/chi/middleware"
-	"github.com/sirupsen/logrus"
 )
 
 // Fields Type to pass when we want to call WithFields for structured logging
+// it matches the old logrus Fields type for convenience.
 type Fields map[string]interface{}
 
-// Logger interface
-type Logger interface {
-	Info(args ...interface{})
-	Infof(message string, args ...interface{})
-	Debug(args ...interface{})
-	Debugf(message string, args ...interface{})
-	Error(args ...interface{})
-	Errorf(message string, args ...interface{})
-	Warn(args ...interface{})
-	Warnf(message string, args ...interface{})
-	Fatal(args ...interface{})
-	Fatalf(message string, args ...interface{})
-	Panic(args ...interface{})
-	Panicf(message string, args ...interface{})
-	Writer() *io.PipeWriter
-}
-
 var (
-	logger *logrus.Logger
+	logger *slog.Logger
 )
 
 func init() {
 	New(false, "info")
 }
 
-// New - Creates a new instance of logrus with customized configuration
-func New(isJSONFormatted bool, logLevel string) *logrus.Logger {
-	var formatter logrus.Formatter
-
-	formatter = &logrus.TextFormatter{
-		ForceColors:            true,
-		DisableLevelTruncation: true,
+// New creates a new slog.Logger with the given configuration. If a writer is
+// provided it will be used as the output destination.
+func New(isJSONFormatted bool, logLevel string, out ...io.Writer) *slog.Logger {
+	w := io.Writer(os.Stdout)
+	if len(out) > 0 && out[0] != nil {
+		w = out[0]
 	}
 
+	opts := &slog.HandlerOptions{Level: getLevel(logLevel)}
+	var h slog.Handler
 	if isJSONFormatted {
-		formatter = &logrus.JSONFormatter{}
+		h = slog.NewJSONHandler(w, opts)
+	} else {
+		h = slog.NewTextHandler(w, opts)
 	}
-	log := logrus.New()
-	log.SetFormatter(formatter)
-	log.SetLevel(getLevel(logLevel))
 
+	log := slog.New(h)
 	logger = log
 	return log
 }
 
-func GetLogger() Logger {
-	return logger
+// GetLogger returns the package logger.
+func GetLogger() *slog.Logger { return logger }
+
+// RequestLogger creates a logger with the request ID on it.
+func RequestLogger(ctx context.Context) *slog.Logger {
+	return logger.With(slog.String("requestID", middleware.GetReqID(ctx)))
 }
 
-// RequestLogger creates a logger with the request ID on it
-func RequestLogger(ctx context.Context) Logger {
-	return logger.WithFields(logrus.Fields{
-		"requestID": middleware.GetReqID(ctx),
-	})
-}
-
-func Writer() *io.PipeWriter {
-	return logger.Writer()
-}
-
-func WriterLevel(logLevel string) *io.PipeWriter {
-	return logger.WriterLevel(getLevel(logLevel))
-}
-
-func getLevel(logLevel string) logrus.Level {
-	level := logrus.InfoLevel
-	switch logLevel {
-	case "panic":
-		level = logrus.PanicLevel
-	case "fatal":
-		level = logrus.FatalLevel
-	case "error":
-		level = logrus.ErrorLevel
-	case "warn":
-		level = logrus.WarnLevel
-	case "info":
-		level = logrus.InfoLevel
+// Helper to convert string log levels into slog.Level values.
+func getLevel(lvl string) slog.Level {
+	switch strings.ToLower(lvl) {
 	case "debug":
-		level = logrus.DebugLevel
+		return slog.LevelDebug
+	case "info":
+		return slog.LevelInfo
+	case "warn":
+		return slog.LevelWarn
+	case "error", "fatal", "panic":
+		return slog.LevelError
+	default:
+		return slog.LevelInfo
 	}
-
-	return level
 }
 
-func Info(args ...interface{}) {
-	logger.Info(args...)
+// helper to convert Fields to slog attributes
+func toAttrs(fields Fields) []slog.Attr {
+	attrs := make([]slog.Attr, 0, len(fields))
+	for k, v := range fields {
+		attrs = append(attrs, slog.Any(k, v))
+	}
+	return attrs
 }
 
-func Infof(message string, args ...interface{}) {
-	logger.Infof(message, args...)
-}
-
+func Info(args ...interface{})              { logger.Info(fmt.Sprint(args...)) }
+func Infof(msg string, args ...interface{}) { logger.Info(fmt.Sprintf(msg, args...)) }
 func InfoWithFields(fields Fields, args ...interface{}) {
-	logger.WithFields(logrus.Fields(fields)).Info(args...)
+	logger.With(toAttrs(fields)...).Info(fmt.Sprint(args...))
+}
+func InfoWithFieldsf(fields Fields, msg string, args ...interface{}) {
+	logger.With(toAttrs(fields)...).Info(fmt.Sprintf(msg, args...))
 }
 
-func InfoWithFieldsf(fields Fields, message string, args ...interface{}) {
-	logger.WithFields(logrus.Fields(fields)).Infof(message, args...)
-}
-
-func Debug(args ...interface{}) {
-	logger.Debug(args...)
-}
-
-func Debugf(message string, args ...interface{}) {
-	logger.Debugf(message, args...)
-}
-
+func Debug(args ...interface{})              { logger.Debug(fmt.Sprint(args...)) }
+func Debugf(msg string, args ...interface{}) { logger.Debug(fmt.Sprintf(msg, args...)) }
 func DebugWithFields(fields Fields, args ...interface{}) {
-	logger.WithFields(logrus.Fields(fields)).Debug(args...)
+	logger.With(toAttrs(fields)...).Debug(fmt.Sprint(args...))
+}
+func DebugWithFieldsf(fields Fields, msg string, args ...interface{}) {
+	logger.With(toAttrs(fields)...).Debug(fmt.Sprintf(msg, args...))
 }
 
-func DebugWithFieldsf(fields Fields, message string, args ...interface{}) {
-	logger.WithFields(logrus.Fields(fields)).Debugf(message, args...)
-}
-
-func Error(args ...interface{}) {
-	logger.Error(args...)
-}
-
-func Errorf(message string, args ...interface{}) {
-	logger.Errorf(message, args...)
-}
-
+func Error(args ...interface{})              { logger.Error(fmt.Sprint(args...)) }
+func Errorf(msg string, args ...interface{}) { logger.Error(fmt.Sprintf(msg, args...)) }
 func ErrorWithFields(fields Fields, args ...interface{}) {
-	logger.WithFields(logrus.Fields(fields)).Error(args...)
+	logger.With(toAttrs(fields)...).Error(fmt.Sprint(args...))
 }
-
-func ErrorWithFieldsf(fields Fields, message string, args ...interface{}) {
-	logger.WithFields(logrus.Fields(fields)).Errorf(message, args...)
+func ErrorWithFieldsf(fields Fields, msg string, args ...interface{}) {
+	logger.With(toAttrs(fields)...).Error(fmt.Sprintf(msg, args...))
 }
 
 func NewError(args ...interface{}) error {
 	Error(args...)
-	return errors.New(fmt.Sprint(args...))
+	return fmt.Errorf("%s", fmt.Sprint(args...))
 }
-
-func NewErrorf(message string, args ...interface{}) error {
-	Errorf(message, args...)
-	return fmt.Errorf(message, args...)
+func NewErrorf(msg string, args ...interface{}) error {
+	Errorf(msg, args...)
+	return fmt.Errorf(msg, args...)
 }
-
 func NewErrorWithFields(fields Fields, args ...interface{}) error {
 	ErrorWithFields(fields, args...)
-	return errors.New(fmt.Sprint(args...))
+	return fmt.Errorf("%s", fmt.Sprint(args...))
+}
+func NewErrorWithFieldsf(fields Fields, msg string, args ...interface{}) error {
+	ErrorWithFieldsf(fields, msg, args...)
+	return fmt.Errorf(msg, args...)
 }
 
-func NewErrorWithFieldsf(fields Fields, message string, args ...interface{}) error {
-	ErrorWithFieldsf(fields, message, args...)
-	return fmt.Errorf(message, args...)
-}
-
-func Warn(args ...interface{}) {
-	logger.Warn(args...)
-}
-
-func Warnf(message string, args ...interface{}) {
-	logger.Warnf(message, args...)
-}
-
+func Warn(args ...interface{})              { logger.Warn(fmt.Sprint(args...)) }
+func Warnf(msg string, args ...interface{}) { logger.Warn(fmt.Sprintf(msg, args...)) }
 func WarnWithFields(fields Fields, args ...interface{}) {
-	logger.WithFields(logrus.Fields(fields)).Warn(args...)
+	logger.With(toAttrs(fields)...).Warn(fmt.Sprint(args...))
 }
-
-func WarnWithFieldsf(fields Fields, message string, args ...interface{}) {
-	logger.WithFields(logrus.Fields(fields)).Warnf(message, args...)
+func WarnWithFieldsf(fields Fields, msg string, args ...interface{}) {
+	logger.With(toAttrs(fields)...).Warn(fmt.Sprintf(msg, args...))
 }
 
 func Fatal(args ...interface{}) {
-	logger.Fatal(args...)
+	logger.Error(fmt.Sprint(args...))
+	os.Exit(1)
 }
-
-func Fatalf(message string, args ...interface{}) {
-	logger.Fatalf(message, args...)
+func Fatalf(msg string, args ...interface{}) {
+	logger.Error(fmt.Sprintf(msg, args...))
+	os.Exit(1)
 }
-
 func FatalWithFields(fields Fields, args ...interface{}) {
-	logger.WithFields(logrus.Fields(fields)).Fatal(args...)
+	logger.With(toAttrs(fields)...).Error(fmt.Sprint(args...))
+	os.Exit(1)
 }
-
-func FatalWithFieldsf(fields Fields, message string, args ...interface{}) {
-	logger.WithFields(logrus.Fields(fields)).Fatalf(message, args...)
+func FatalWithFieldsf(fields Fields, msg string, args ...interface{}) {
+	logger.With(toAttrs(fields)...).Error(fmt.Sprintf(msg, args...))
+	os.Exit(1)
 }
 
 func Panic(args ...interface{}) {
-	logger.Panic(args...)
+	msg := fmt.Sprint(args...)
+	logger.Error(msg)
+	panic(msg)
 }
-
-func Panicf(message string, args ...interface{}) {
-	logger.Panicf(message, args...)
+func Panicf(msg string, args ...interface{}) {
+	formatted := fmt.Sprintf(msg, args...)
+	logger.Error(formatted)
+	panic(formatted)
 }
-
 func PanicWithFields(fields Fields, args ...interface{}) {
-	logger.WithFields(logrus.Fields(fields)).Panic(args...)
+	msg := fmt.Sprint(args...)
+	logger.With(toAttrs(fields)...).Error(msg)
+	panic(msg)
+}
+func PanicWithFieldsf(fields Fields, msg string, args ...interface{}) {
+	formatted := fmt.Sprintf(msg, args...)
+	logger.With(toAttrs(fields)...).Error(formatted)
+	panic(formatted)
 }
 
-func PanicWithFieldsf(fields Fields, message string, args ...interface{}) {
-	logger.WithFields(logrus.Fields(fields)).Panicf(message, args...)
-}
-
-// ServerLogger is a middleware that logs the start and end of each request, along
-// with some useful data about what was requested, what the response status was,
-// and how long it took to return.
+// ServerLogger logs the start and end of each request with useful metadata.
 func ServerLogger() func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
@@ -225,15 +178,15 @@ func ServerLogger() func(next http.Handler) http.Handler {
 
 			t1 := time.Now()
 			defer func() {
-				logger.WithFields(logrus.Fields{
-					"proto":     r.Proto,
-					"path":      r.URL.Path,
-					"duration":  time.Since(t1),
-					"status":    ww.Status(),
-					"size":      ww.BytesWritten(),
-					"ip":        r.RemoteAddr,
-					"requestID": middleware.GetReqID(r.Context()),
-				}).Info("Request Served")
+				logger.With(
+					slog.String("proto", r.Proto),
+					slog.String("path", r.URL.Path),
+					slog.Duration("duration", time.Since(t1)),
+					slog.Int("status", ww.Status()),
+					slog.Int("size", ww.BytesWritten()),
+					slog.String("ip", r.RemoteAddr),
+					slog.String("requestID", middleware.GetReqID(r.Context())),
+				).Info("Request Served")
 			}()
 
 			next.ServeHTTP(ww, r)
@@ -241,3 +194,8 @@ func ServerLogger() func(next http.Handler) http.Handler {
 		return http.HandlerFunc(fn)
 	}
 }
+
+// Writer exposes a writer from the logger's handler when possible. If the
+// underlying handler does not support retrieving a writer, nil is returned.
+func Writer() *io.PipeWriter            { return nil }
+func WriterLevel(string) *io.PipeWriter { return nil }

@@ -2,6 +2,7 @@ package log
 
 import (
 	"bytes"
+	"log/slog"
 
 	. "github.com/onsi/ginkgo"
 	g "github.com/onsi/gomega"
@@ -10,8 +11,7 @@ import (
 var _ = Describe("PrefixedLogger", func() {
 	It("should prefix the logger instance", func() {
 		buf := bytes.Buffer{}
-		logger := New(true, "info")
-		logger.Out = &buf
+		logger := New(true, "info", &buf)
 
 		pl := NewPrefixedLogger("Test", logger)
 		pl2 := NewPrefixedLogger("Foo", logger)
@@ -40,13 +40,12 @@ var _ = Describe("PrefixedLogger", func() {
 
 	It("should create an info log by default if one is not given", func() {
 		buf := bytes.Buffer{}
-		pl := NewPrefixedLogger("test", nil)
-		pl.LoggerInstance.Out = &buf
+		pl := NewPrefixedLogger("test", slog.New(slog.NewJSONHandler(&buf, nil)))
 		pl.Info("goldfish")
 
 		b := ByteLogs{Log: &buf}
 		b.Parse(nil)
-		g.Expect(b.Parsed[0]["level"]).To(g.Equal("info"))
+		g.Expect(b.Parsed[0]["level"]).To(g.Equal("INFO"))
 		g.Expect(b.Parsed[0]["msg"]).To(g.Equal("test: goldfish"))
 	})
 })

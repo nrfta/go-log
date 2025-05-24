@@ -2,144 +2,144 @@ package log
 
 import (
 	"fmt"
-	"io"
+	"log/slog"
 
 	"github.com/neighborly/go-errors"
-	"github.com/sirupsen/logrus"
 )
 
+// PrefixedLogger wraps a slog.Logger and prefixes all messages with a given
+// string.
 type PrefixedLogger struct {
 	Prefix         string
-	LoggerInstance *logrus.Logger
+	LoggerInstance *slog.Logger
 }
 
-func NewPrefixedLogger(prefix string, instance Logger) PrefixedLogger {
-	var _logger *logrus.Logger
+// NewPrefixedLogger returns a PrefixedLogger using the provided slog.Logger. If
+// nil is given, a new JSON formatted info-level logger is created.
+func NewPrefixedLogger(prefix string, instance *slog.Logger) PrefixedLogger {
+	var l *slog.Logger
 	if instance == nil {
-		_logger = New(true, "info")
-	} else if logrusLogger, ok := instance.(*logrus.Logger); ok {
-		_logger = logrusLogger
+		l = New(true, "info")
+	} else {
+		l = instance
 	}
-
-	return PrefixedLogger{
-		Prefix:         prefix,
-		LoggerInstance: _logger,
-	}
+	return PrefixedLogger{Prefix: prefix, LoggerInstance: l}
 }
 
-func (l *PrefixedLogger) prefixArgs(args []interface{}) []interface{} {
-	return append([]interface{}{l.Prefix + ": "}, args...)
+func (l *PrefixedLogger) prefixArgs(args []interface{}) string {
+	return fmt.Sprint(append([]interface{}{l.Prefix + ": "}, args...)...)
 }
 
 func (l *PrefixedLogger) prefixMsg(message string) string {
 	return fmt.Sprintf("%s: %s", l.Prefix, message)
 }
 
-// implement logger interface
 func (l *PrefixedLogger) Info(args ...interface{}) {
-	l.LoggerInstance.Info(l.prefixArgs(args)...)
+	l.LoggerInstance.Info(l.prefixArgs(args))
 }
 
 func (l *PrefixedLogger) Infof(message string, args ...interface{}) {
-	l.LoggerInstance.Infof(l.prefixMsg(message), args...)
+	l.LoggerInstance.Info(l.prefixMsg(fmt.Sprintf(message, args...)))
 }
 
 func (l *PrefixedLogger) Debug(args ...interface{}) {
-	l.LoggerInstance.Debug(l.prefixArgs(args)...)
+	l.LoggerInstance.Debug(l.prefixArgs(args))
 }
 
 func (l *PrefixedLogger) Debugf(message string, args ...interface{}) {
-	l.LoggerInstance.Debugf(l.prefixMsg(message), args...)
+	l.LoggerInstance.Debug(l.prefixMsg(fmt.Sprintf(message, args...)))
 }
 
 func (l *PrefixedLogger) Error(args ...interface{}) {
-	l.LoggerInstance.Error(l.prefixArgs(args)...)
+	l.LoggerInstance.Error(l.prefixArgs(args))
 }
 
 func (l *PrefixedLogger) Errorf(message string, args ...interface{}) {
-	l.LoggerInstance.Errorf(l.prefixMsg(message), args...)
+	l.LoggerInstance.Error(l.prefixMsg(fmt.Sprintf(message, args...)))
 }
 
 func (l *PrefixedLogger) Warn(args ...interface{}) {
-	l.LoggerInstance.Warn(l.prefixArgs(args)...)
+	l.LoggerInstance.Warn(l.prefixArgs(args))
 }
 
 func (l *PrefixedLogger) Warnf(message string, args ...interface{}) {
-	l.LoggerInstance.Warnf(l.prefixMsg(message), args...)
+	l.LoggerInstance.Warn(l.prefixMsg(fmt.Sprintf(message, args...)))
 }
 
 func (l *PrefixedLogger) Fatal(args ...interface{}) {
-	l.LoggerInstance.Fatal(l.prefixArgs(args)...)
+	l.LoggerInstance.Error(l.prefixArgs(args))
 }
 
 func (l *PrefixedLogger) Fatalf(message string, args ...interface{}) {
-	l.LoggerInstance.Fatalf(l.prefixMsg(message), args...)
+	l.LoggerInstance.Error(l.prefixMsg(fmt.Sprintf(message, args...)))
 }
 
 func (l *PrefixedLogger) Panic(args ...interface{}) {
-	l.LoggerInstance.Panic(l.prefixArgs(args)...)
+	msg := l.prefixArgs(args)
+	l.LoggerInstance.Error(msg)
+	panic(msg)
 }
 
 func (l *PrefixedLogger) Panicf(message string, args ...interface{}) {
-	l.LoggerInstance.Panicf(l.prefixMsg(message), args...)
-}
-
-func (l *PrefixedLogger) Writer() *io.PipeWriter {
-	return l.LoggerInstance.Writer()
+	msg := l.prefixMsg(fmt.Sprintf(message, args...))
+	l.LoggerInstance.Error(msg)
+	panic(msg)
 }
 
 // fields
-
 func (l *PrefixedLogger) InfoWithFields(fields Fields, args ...interface{}) {
-	l.LoggerInstance.WithFields(logrus.Fields(fields)).Info(l.prefixArgs(args)...)
+	l.LoggerInstance.With(toAttrs(fields)...).Info(l.prefixArgs(args))
 }
 
 func (l *PrefixedLogger) InfoWithFieldsf(fields Fields, message string, args ...interface{}) {
-	l.LoggerInstance.WithFields(logrus.Fields(fields)).Infof(l.prefixMsg(message), args...)
+	l.LoggerInstance.With(toAttrs(fields)...).Info(l.prefixMsg(fmt.Sprintf(message, args...)))
 }
 
 func (l *PrefixedLogger) DebugWithFields(fields Fields, args ...interface{}) {
-	l.LoggerInstance.WithFields(logrus.Fields(fields)).Debug(l.prefixArgs(args)...)
+	l.LoggerInstance.With(toAttrs(fields)...).Debug(l.prefixArgs(args))
 }
 
 func (l *PrefixedLogger) DebugWithFieldsf(fields Fields, message string, args ...interface{}) {
-	l.LoggerInstance.WithFields(logrus.Fields(fields)).Debugf(l.prefixMsg(message), args...)
+	l.LoggerInstance.With(toAttrs(fields)...).Debug(l.prefixMsg(fmt.Sprintf(message, args...)))
 }
 
 func (l *PrefixedLogger) ErrorWithFields(fields Fields, args ...interface{}) {
-	l.LoggerInstance.WithFields(logrus.Fields(fields)).Error(l.prefixArgs(args)...)
+	l.LoggerInstance.With(toAttrs(fields)...).Error(l.prefixArgs(args))
 }
 
 func (l *PrefixedLogger) ErrorWithFieldsf(fields Fields, message string, args ...interface{}) {
-	l.LoggerInstance.WithFields(logrus.Fields(fields)).Errorf(l.prefixMsg(message), args...)
+	l.LoggerInstance.With(toAttrs(fields)...).Error(l.prefixMsg(fmt.Sprintf(message, args...)))
 }
 
 func (l *PrefixedLogger) WarnWithFields(fields Fields, args ...interface{}) {
-	l.LoggerInstance.WithFields(logrus.Fields(fields)).Warn(l.prefixArgs(args)...)
+	l.LoggerInstance.With(toAttrs(fields)...).Warn(l.prefixArgs(args))
 }
 
 func (l *PrefixedLogger) WarnWithFieldsf(fields Fields, message string, args ...interface{}) {
-	l.LoggerInstance.WithFields(logrus.Fields(fields)).Warnf(l.prefixMsg(message), args...)
+	l.LoggerInstance.With(toAttrs(fields)...).Warn(l.prefixMsg(fmt.Sprintf(message, args...)))
 }
 
 func (l *PrefixedLogger) FatalWithFields(fields Fields, args ...interface{}) {
-	l.LoggerInstance.WithFields(logrus.Fields(fields)).Fatal(l.prefixArgs(args)...)
+	l.LoggerInstance.With(toAttrs(fields)...).Error(l.prefixArgs(args))
 }
 
 func (l *PrefixedLogger) FatalWithFieldsf(fields Fields, message string, args ...interface{}) {
-	l.LoggerInstance.WithFields(logrus.Fields(fields)).Fatalf(l.prefixMsg(message), args...)
+	l.LoggerInstance.With(toAttrs(fields)...).Error(l.prefixMsg(fmt.Sprintf(message, args...)))
 }
 
 func (l *PrefixedLogger) PanicWithFields(fields Fields, args ...interface{}) {
-	l.LoggerInstance.WithFields(logrus.Fields(fields)).Panic(l.prefixArgs(args)...)
+	msg := l.prefixArgs(args)
+	l.LoggerInstance.With(toAttrs(fields)...).Error(msg)
+	panic(msg)
 }
 
 func (l *PrefixedLogger) PanicWithFieldsf(fields Fields, message string, args ...interface{}) {
-	l.LoggerInstance.WithFields(logrus.Fields(fields)).Panicf(l.prefixMsg(message), args...)
+	msg := l.prefixMsg(fmt.Sprintf(message, args...))
+	l.LoggerInstance.With(toAttrs(fields)...).Error(msg)
+	panic(msg)
 }
 
 // error wrapping
-
 func (l *PrefixedLogger) PrefixError(err error, msg string) error {
 	return errors.Wrapf(err, "%s: %s", l.Prefix, msg)
 }
